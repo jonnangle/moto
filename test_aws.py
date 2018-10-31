@@ -3,7 +3,7 @@ import boto3
 def list_zip_files(bucket='mybucket'):
     s3 = boto3.resource('s3')
     s3bucket = s3.Bucket(bucket)
-    zips = [f for f in s3bucket.objects.all() if f.key.endswith('zip')]
+    zips = [f for f in s3bucket.objects.all() if f.key.endswith('.zip')]
     return zips
 
 from mock import patch, Mock
@@ -33,3 +33,12 @@ def test_list_keys_with_bucket_name_calls_correct_bucket(mock):
 
     mock.assert_called_with('s3')
     mock().Bucket.assert_called_with('someotherbucket')
+
+@patch('boto3.resource')
+def test_list_keys_with_default_bucket_matches_extension(mock):
+    mock.return_value.Bucket.return_value.objects.all.return_value = [Mock(key='file1zip'), Mock(key='file2.zip'), Mock(key='file3.zip')]
+
+    ziplist = list_zip_files()
+    mock.assert_called_with('s3')
+    mock().Bucket.assert_called_with('mybucket')
+    assert len(ziplist) == 2
