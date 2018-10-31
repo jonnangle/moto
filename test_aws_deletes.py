@@ -7,23 +7,27 @@ def delete_zip_files(bucket='mybucket'):
       if f.key.endswith('.zip'):
         f.remove()
 
-from mock import patch, Mock
+from moto import mock_s3
 
-@patch('boto3.resource')
-def test_delete_zip_files(mock):
-  # Create three mocks - two zipfiles, one non-zipfile
-  zipfile1mock = Mock(key='file1.zip')
-  zipfile2mock = Mock(key='file2.zip')
-  nonzipfilemock = Mock(key='file3.gif')
+@mock_s3
+def test_delete_zip_files():
+  # Set up our pre-requisites - a bucket, and some files
+  BUCKET='my-test-bucket'
+  s3 = boto3.resource('s3')
+  s3.create_bucket(Bucket=BUCKET)
 
-  s3_bucket_files = [zipfile1mock, zipfile2mock, nonzipfilemock]
-  mock.return_value.Bucket.return_value.objects.all.return_value = s3_bucket_files
+  for filename in ['file1.zip', 'file2.zip', 'file3.gif']:
+    s3_object = s3.Object(BUCKET, filename)
+    s3_object.put(Body="")
 
-  delete_zip_files()
+  # We really do have 3 files in the mocked bucket now!
+  s3bucket = s3.Bucket(BUCKET)
+  assert len(list(s3bucket.objects.all())) == 3
 
-  # we want to delete these
-  zipfile1mock.remove.assert_called()
-  zipfile2mock.remove.assert_called()
+  # Run our function under test to delete the .zip files
+  delete_zip_files(bucket=BUCKET)
 
-  # we DON'T want to delete this one!
-  nonzipfilemock.remove.assert_not_called()
+  # Now see what things look like now!
+  remaining_files = list(s3bucket.objects.all())
+  assert len(remaining_files) == 1
+  assert remaining_files[0].key == "file3.gif"
