@@ -5,7 +5,7 @@ def delete_zip_files(bucket='mybucket'):
     s3bucket = s3.Bucket(bucket)
     for f in s3bucket.objects.all():
       if f.key.endswith('.zip'):
-        f.remove()
+        f.delete()
 
 from moto import mock_s3
 
