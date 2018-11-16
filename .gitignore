@@ -1,0 +1,7 @@
+/.gitignore
+/.nyc_output/
+/.python-version
+/.vscode/
+/__pycache__/
+/coverage/
+/tmp/
