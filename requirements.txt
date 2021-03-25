@@ -43,7 +43,7 @@ pytest==3.9.3
 python-dateutil==2.7.5
 python-jose==2.0.2
 pytz==2018.7
-PyYAML==3.13
+PyYAML==5.4
 requests==2.20.0
 responses==0.10.2
 rope==0.11.0
